@@ -1,0 +1,15 @@
+#!perl
+
+use common::sense;
+use Moose::Autobox;
+use File::Slurp;
+use lib '../lib';
+use Home::Utils;
+
+while(1) {
+    Home::Utils::update_carbon({
+        value => read_file('/proc/loadavg')->split(' ')->shift,
+        metric => 'servers.valinor.loadavg.minutely',
+    });
+    sleep 60;
+}
