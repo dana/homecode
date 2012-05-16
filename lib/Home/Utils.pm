@@ -15,6 +15,7 @@ update_carbon {
         @metrics->map(sub {
             my $ts = $_->{ts} || time;
             $sock->print("$_->{metric} $_->{value} $ts\n");
+            $_->{debug}->($_) if $_->{debug};
         });
         $sock->close;
     };

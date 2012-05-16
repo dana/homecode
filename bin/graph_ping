@@ -6,16 +6,19 @@ use File::Slurp;
 use lib '../lib';
 use Home::Utils;
 
+my $t = shift;
 my $do_graph = sub {
     my ($metric, $value) = @_;
     Home::Utils::update_carbon({
         value => $value,
-        metric => 'network.pings.minutely.' . $metric,
+        metric => "network.pings.minutely.$t." . $metric,
+#        debug => sub {
+#            say $_->dump,
+#        },
     });
 };
-my $t = shift;
 while(1) {
-    ping('www.netcom.com');
+    ping($t);
     sleep 5;
 }
 
