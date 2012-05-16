@@ -1,0 +1,42 @@
+#!perl
+
+use common::sense;
+use Moose::Autobox;
+use File::Slurp;
+use lib '../lib';
+use Home::Utils;
+
+my $do_graph = sub {
+    my ($metric, $value) = @_;
+    Home::Utils::update_carbon({
+        value => $value,
+        metric => 'network.pings.minutely.' . $metric,
+    });
+};
+my $t = shift;
+while(1) {
+    ping('www.netcom.com');
+    sleep 5;
+}
+
+sub
+ping {
+    my $target = shift;
+    my $run = qqping -q -n -W 1 -c 50 -n $target;
+    my ($packet_loss,$min,$avg,$max,$mdev);
+    open my $fh, '-|', $run;
+    while(my $line = <$fh>) {
+        chomp $line;
+        if($line =~ /\s+(?<packet_loss>\d+)\%\s+packet/) {
+            $do_graph->('packet_loss', $+{packet_loss});
+        }
+        if($line =~ / = (?<min>[\d\.]+)\/(?<avg>[\d\.]+)\/(?<max>[\d\.]+)\/(?<mdev>[\d\.]+) /) {
+            $do_graph->('min', $+{min});
+            $do_graph->('avg', $+{avg});
+            $do_graph->('max', $+{max});
+            $do_graph->('mdev', $+{mdev});
+        }
+        
+    }
+    close $fh;
+}
